@@ -27,6 +27,7 @@ export default class Grid {
             grid[x] = [];
             arr.forEach((cell, y) => grid[x][y] = Rules(cell, seed.getNeighbors(x,y)));
         });
+        return grid;
     }
     getNeighbors(x, y){
         let temp = [];
