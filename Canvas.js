@@ -14,9 +14,9 @@ export default class Canvas {
     }
     #splitCanvas(ctx, seed){
         let temp = [];
-        const gridWidth = (ctx.canvas.width/this.gridCount) - 2*this.borderSize;
+        const gridWidth = (ctx.canvas.width/this.gridCount) - this.borderSize;
         const gridHeight = ctx.canvas.height - 2*this.borderSize;
-        const initialX = (inc) => this.borderSize+(inc*gridWidth)+(inc*this.borderSize*2);
+        const initialX = (inc) => this.borderSize+(inc*gridWidth)+(inc*this.borderSize);
         for(let i = 0; i < this.gridCount; i++){
             let coords = {};
             coords.x = initialX(i);
