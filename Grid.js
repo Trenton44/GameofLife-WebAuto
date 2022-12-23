@@ -1,10 +1,11 @@
+import Rules from "./Rules.js";
 const genColor = (min=150, max=255) => Math.floor(Math.random() * (max-min+1)) + min;
-class Grid {
+export default class Grid {
     constructor(ctx, ctxSpace, width, height, seed){
         this.ctx = ctx;
         this.ctxSpace  = ctxSpace;
-        this.width  = width;
-        this.height  = height;
+        this.width  = width/ctxSpace.size;
+        this.height  = height/ctxSpace.size;
         this.grid = this.#newGame(seed);
     }
     #newGame(seed){
@@ -46,22 +47,24 @@ class Grid {
         let next = this.ctx.createImageData(imageData);
         temp.forEach((yarr, xindex) => {
             yarr.forEach((cell, yindex) => {
-                // generate a random color this cell will take on.
                 let pixelColor = cell ? [genColor(), genColor(), genColor(), 255] : [0, 0, 0, 255];
                 for(let i=0; i < this.ctxSpace.size; i++){
-                    for(let z=0; z < this.ctxSpace.size; z++){
-                        let pixelLoc = (xindex+i)*(yarr.length*4) + (yindex+i)*4;
+                    for(let z=0; z < this.ctxSpace.size; i++){
+                        let location = (xindex+i)*(yarr.length*4) + (yindex+z)*4;
                         // go to every pixel location (coords are for ctx.ImageData). change each of the 4 pixels to the new color
                         //console.log("original: "+next.data[pixelLoc]+","+next.data[pixelLoc+1]+","+next.data[pixelLoc+2]+","+next.data[pixelLoc+3]+",");
-                        for(let i=0; i<4; i++){
-                            next.data[pixelLoc+i] = pixelColor[i];
-                        }
+                        for(let j=0; j<4; j++){ next.data[location+j] = pixelColor[j]; }
                         //console.log("altered: "+next.data[pixelLoc]+","+next.data[pixelLoc+1]+","+next.data[pixelLoc+2]+","+next.data[pixelLoc+3]+",");
-                    } 
+                    }
                 }
             });
         });
         this.ctx.putImageData(next, this.ctxSpace.x, this.ctxSpace.y);
         this.grid = temp;
+    }
+    wipeField(){
+        this.ctx.strokeStyle = "black";
+        console.log([this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy]);
+        this.ctx.strokeRect(this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy);
     }
 }
