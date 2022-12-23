@@ -24,7 +24,7 @@ export default class Canvas {
             coords.dx = coords.x + gridWidth - coords.x - this.borderSize;
             coords.dy = coords.y + gridHeight - this.borderSize;
             coords.size = this.cellSize;
-            temp.push(new Grid(ctx, coords, coords.dx-coords.x, coords.dy-coords.y, seed));
+            temp.push(new Grid(ctx, coords, coords.dx, coords.dy, seed));
         }
         return temp;
     }
