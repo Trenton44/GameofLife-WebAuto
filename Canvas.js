@@ -8,9 +8,14 @@ export default class Canvas {
         this.borderSize = borderSize;
         this.borderCoords = [];
         this.borderCoords.push([0,0,ctx.canvas.width, ctx.canvas.height]);
+        console.log("setting up Grids.");
         this.grids = this.#splitCanvas(ctx, seed);
+        console.log("Grid setup complete.");
+        console.log("Drawing borders.");
         this.#drawBorder(ctx);
+        console.log("Borders drawn. drawing Grid spaces...");
         this.grids.forEach(grid => grid.wipeField());
+        console.log("Grid spaces drawn.");
     }
     #splitCanvas(ctx, seed){
         let temp = [];
@@ -18,6 +23,7 @@ export default class Canvas {
         const gridHeight = ctx.canvas.height - 2*this.borderSize;
         const initialX = (inc) => this.borderSize+(inc*gridWidth)+(inc*this.borderSize);
         for(let i = 0; i < this.gridCount; i++){
+            console.log("Setting up Grid "+i);
             let coords = {};
             coords.x = initialX(i);
             coords.y = this.borderSize;
@@ -25,12 +31,13 @@ export default class Canvas {
             coords.dy = coords.y + gridHeight - this.borderSize;
             coords.size = this.cellSize;
             temp.push(new Grid(ctx, coords, coords.dx, coords.dy, seed));
+            console.log(temp[i]);
+            console.log("Grid "+i+" setup complete.");
         }
         return temp;
     }
     #drawBorder(ctx){
         this.borderCoords.forEach(coord => {
-            //console.log(coord);
             ctx.beginPath();
             ctx.fillStyle = "purple";
             ctx.fillRect(...coord);
