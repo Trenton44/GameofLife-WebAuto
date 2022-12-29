@@ -7,7 +7,7 @@ export default class Canvas {
         this.gridCount = grids;
         this.borderSize = borderSize;
         this.borderCoords = [];
-        this.borderCoords.push([0,0,ctx.canvas.width, ctx.canvas.height]);
+        this.borderCoords.push([0, 0, ctx.canvas.width, ctx.canvas.height]);
         console.log("setting up Grids.");
         this.grids = this.#splitCanvas(ctx, seed);
         console.log("Grid setup complete.");
