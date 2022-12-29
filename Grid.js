@@ -17,7 +17,7 @@ export default class Grid {
             grid[x] = [];
             for(let y = 0; y < this.height; y++){
                 let alive = x % seed[0] == 0 && y % seed[1] == 0;
-                grid[x][y] = new Cell(alive, x, y, this.ctxSpace.size, this.width);
+                grid[x][y] = new Cell(alive, x, y, this.ctxSpace.size, this.ctx.canvas.width);
             }
         }
         return grid;
@@ -48,6 +48,7 @@ export default class Grid {
         temp.forEach((yarr, xindex) => 
             yarr.forEach((cell, yindex) => cell.draw(next.data, temp.length, yarr.length))
         );
+        console.log("data length: "+next.data.length);
         this.ctx.putImageData(next, this.ctxSpace.x, this.ctxSpace.y);
         this.grid = temp;
     }
