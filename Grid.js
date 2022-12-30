@@ -5,8 +5,8 @@ export default class Grid {
     constructor(ctx, ctxSpace, width, height, seed){
         this.ctx = ctx;
         this.ctxSpace = ctxSpace;
-        this.width = width/(this.ctxSpace.size*this.ctxSpace.size);
-        this.height = height/(this.ctxSpace.size*this.ctxSpace.size);
+        this.width = width/(this.ctxSpace.size);
+        this.height = height/(this.ctxSpace.size);
         this.grid = this.#newGame(seed);
     }
     #newGame(seed){
@@ -42,9 +42,9 @@ export default class Grid {
         return temp;
     }
     *#cellPixel(arr){
-        for(let step=0; step < 2; step++){
-            for(let y=0; y < arr.length; y++){
-                let xaxis = arr[y];
+        for(let y=0; y < arr.length; y++){
+            let xaxis = arr[y];
+            for(let step=0; step < 2; step++){
                 for(let x=0; x < xaxis.length; x++){
                     let cell = xaxis[x];
                     for(let z=step; z < cell.canvasPositions.length; z+=2){
@@ -79,7 +79,7 @@ export default class Grid {
         this.ctx.putImageData(nextImage, this.ctxSpace.x, this.ctxSpace.y);
     }
     wipeField(){
-        this.ctx.fillStyle = "black";
+        this.ctx.fillStyle = "white";
         console.log([this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy]);
         this.ctx.fillRect(this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy);
     }
