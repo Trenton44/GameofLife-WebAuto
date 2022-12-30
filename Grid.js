@@ -26,27 +26,28 @@ export default class Grid {
         let temp = [];
         this.grid.forEach((yarr, y) => {
             temp[y] = [];
-            yarr.forEach((cell, x) => temp[y][x] = new Cell(Rules(cell.alive, this.getNeighbors(x, y)), cell.gridPosition[0], cell.gridPosition[1], this.ctxSpace.size));
+            yarr.forEach((cell, x) => temp[y][x] = cell.alive);
         });
-        return temp;
+        this.grid.forEach((yarr, y) => {
+            yarr.forEach((cell, x) => cell.alive = Rules(cell.alive, this.getNeighbors(x, y, temp)));
+        });
+        return this.grid;
     }
-    getNeighbors(x, y){
-        //console.log("Cell: "+[x, y]+" : "+this.grid[y][x].alive);
+    getNeighbors(x, y, boolGrid){
+        //console.log("Cell: "+[x, y]+" : "+boolGrid[y][x].alive);
         let temp = [];
         for(let z=y-1; z <= y+1; z++){
             if(z < 0 || z >= this.height){ continue; }
             for(let i = x-1; i <= x+1; i++){
                 if(i < 0 || i >= this.width){ continue; }
                 if(i === x && z === y){ continue; }
-                //console.log(this.grid[z][i]);
-                temp.push(this.grid[z][i].alive);
+                temp.push(boolGrid[z][i]);
             }
         }
         //console.log("Neighbors: "+temp);
         return temp;
     }
     *#cellPixel(arr){
-        console.log(arr);
         for(let y=0; y < arr.length; y++){
             let xaxis = arr[y];
             for(let step=0; step < 2; step++){
