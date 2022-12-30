@@ -23,10 +23,11 @@ export default class Grid {
         return grid;
     }
     newGeneration(){
-        let temp = structuredClone(this.grid);
-        temp.forEach((yarr, y) => 
-            yarr.forEach((cell, x) => cell.alive = Rules(cell.alive, this.getNeighbors(x, y)))
-        );
+        let temp = [];
+        this.grid.forEach((yarr, y) => {
+            temp[y] = [];
+            yarr.forEach((cell, x) => temp[y][x] = new Cell(Rules(cell.alive, this.getNeighbors(x, y)), cell.gridPosition[0], cell.gridPosition[1], this.ctxSpace.size));
+        });
         return temp;
     }
     getNeighbors(x, y){
@@ -45,6 +46,7 @@ export default class Grid {
         return temp;
     }
     *#cellPixel(arr){
+        console.log(arr);
         for(let y=0; y < arr.length; y++){
             let xaxis = arr[y];
             for(let step=0; step < 2; step++){
