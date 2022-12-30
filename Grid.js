@@ -23,22 +23,25 @@ export default class Grid {
         return grid;
     }
     newGeneration(){
-        let temp = [...this.grid];
+        let temp = structuredClone(this.grid);
         temp.forEach((yarr, y) => 
             yarr.forEach((cell, x) => cell.alive = Rules(cell.alive, this.getNeighbors(x, y)))
         );
         return temp;
     }
     getNeighbors(x, y){
+        //console.log("Cell: "+[x, y]+" : "+this.grid[y][x].alive);
         let temp = [];
-        for(let z=y-1; z < y+2; z++){
-            if(z < 0 || z>= this.height){ continue; }
-            for(let i = x-1; i < x+2; i++){
+        for(let z=y-1; z <= y+1; z++){
+            if(z < 0 || z >= this.height){ continue; }
+            for(let i = x-1; i <= x+1; i++){
                 if(i < 0 || i >= this.width){ continue; }
-                if(i == x && z == y){ continue; }
+                if(i === x && z === y){ continue; }
+                //console.log(this.grid[z][i]);
                 temp.push(this.grid[z][i].alive);
             }
         }
+        //console.log("Neighbors: "+temp);
         return temp;
     }
     *#cellPixel(arr){
