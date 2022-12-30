@@ -50,10 +50,10 @@ export default class Grid {
     *#cellPixel(arr){
         for(let y=0; y < arr.length; y++){
             let xaxis = arr[y];
-            for(let step=0; step < 2; step++){
+            for(let step=0; step < this.ctxSpace.size; step++){
                 for(let x=0; x < xaxis.length; x++){
                     let cell = xaxis[x];
-                    for(let z=step; z < cell.canvasPositions.length; z+=2){
+                    for(let z=step; z < cell.canvasPositions.length; z+=this.ctxSpace.size){
                         yield cell.draw();
                     }
                 }
