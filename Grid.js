@@ -13,47 +13,70 @@ export default class Grid {
         let grid = [];
         if(seed.length < 2)
             throw Error("Seed should be at least two integers long.");
-        for(let x = 0; x < this.width; x++){
-            grid[x] = [];
-            for(let y = 0; y < this.height; y++){
+        for(let y=0; y < this.height; y++){
+            grid[y] = [];
+            for(let x=0; x < this.width; x++){
                 let alive = x % seed[0] == 0 && y % seed[1] == 0;
-                grid[x][y] = new Cell(alive, x, y, this.ctxSpace.size, this.width);
+                grid[y][x] = new Cell(alive, x, y, this.ctxSpace.size);
             }
         }
         return grid;
     }
-    #newGeneration(){
+    newGeneration(){
         let temp = [...this.grid];
-        temp.forEach((yarr, x) => 
-            yarr.forEach((cell, y) => cell.alive = Rules(cell.alive, this.getNeighbors(x, y)))
+        temp.forEach((yarr, y) => 
+            yarr.forEach((cell, x) => cell.alive = Rules(cell.alive, this.getNeighbors(x, y)))
         );
         return temp;
     }
     getNeighbors(x, y){
         let temp = [];
-        for(let i = x-1; i < x+2; i++){
-            if(i < 0 || i >= this.width){ continue; }
-            for(let z=y-1; z < y+2; z++){
-                if(z < 0 || z>= this.height){ continue; }
+        for(let z=y-1; z < y+2; z++){
+            if(z < 0 || z>= this.height){ continue; }
+            for(let i = x-1; i < x+2; i++){
+                if(i < 0 || i >= this.width){ continue; }
                 if(i == x && z == y){ continue; }
-                temp.push(this.grid[i][z].alive);
+                temp.push(this.grid[z][i].alive);
             }
         }
         return temp;
     }
-    async draw(){
-        let temp = this.#newGeneration();
-        let imageData = this.ctx.getImageData(this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy);
-        let next = this.ctx.createImageData(imageData);
-        console.log(next);
-        temp.forEach((yarr, xindex) => 
-            yarr.forEach((cell, yindex) => {
-                cell.draw(next.data, temp.length, yarr.length);
-            })
-        );
-        console.log("data length: "+next.data.length);
-        this.ctx.putImageData(next, this.ctxSpace.x, this.ctxSpace.y);
+    *#cellPixel(arr){
+        for(let step=0; step < 2; step++){
+            for(let y=0; y < arr.length; y++){
+                let xaxis = arr[y];
+                for(let x=0; x < xaxis.length; x++){
+                    let cell = xaxis[x];
+                    for(let z=step; z < cell.canvasPositions.length; z+=2){
+                        yield cell.draw();
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    age(){
+        let temp = this.newGeneration();
+        this.draw(temp);
         this.grid = temp;
+    }
+    draw(frame){
+        let imageData = this.ctx.getImageData(this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy);
+        let nextImage = this.ctx.createImageData(imageData);
+        let pixels = this.#cellPixel(frame);
+        let next = pixels.next();
+        let counter = 0;
+        while(!next.done){
+            //console.log("Before: "+[nextImage.data[counter], nextImage.data[counter+1], nextImage.data[counter+2],nextImage.data[counter+3] ]);
+            nextImage.data[counter] = next.value[0];
+            nextImage.data[counter+1] = next.value[1];
+            nextImage.data[counter+2] = next.value[2];
+            nextImage.data[counter+3] = next.value[3];
+            //console.log("After: "+[nextImage.data[counter], nextImage.data[counter+1], nextImage.data[counter+2],nextImage.data[counter+3] ]);
+            counter += 4;
+            next = pixels.next();
+        }
+        this.ctx.putImageData(nextImage, this.ctxSpace.x, this.ctxSpace.y);
     }
     wipeField(){
         this.ctx.fillStyle = "black";
