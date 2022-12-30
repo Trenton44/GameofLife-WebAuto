@@ -1,26 +1,26 @@
 const genColor = (min=150, max=255) => Math.floor(Math.random() * (max-min+1)) + min;
 const Black = [0, 0, 0, 255];
-const rescaleCoord = (coord, scalar) => coord*scalar*scalar;
-const pixelPositions = (x, y, scalar, cWidth) => {
+const pixelPositions = (x, y, scalar, gWidth) => {
     let temp = [];
-    //let newVal = (y+1)*(x+1)*scalar*scalar*scalar*scalar*4;
-    let cx = rescaleCoord(x, scalar);
-    let dcx = cx+scalar;
-    let cy = rescaleCoord(y, scalar);
-    let dcy = cy+scalar;
-    for(let i=cx; i<dcx; i++){
-        for(let z=cy; z<dcy; z++){
-            temp.push(((cWidth*z)+i)*4);
+    let cx = x*scalar;
+    let cy = y*scalar;
+    let width = gWidth*(scalar*scalar);
+    for(let i=cx; i<cx+scalar; i++){
+        for(let z=cy; z<cy+scalar; z++){
+            console.log("Point: "+i+","+z);
+            let converted = ((z*width)+i)*4+(z*1);
+            console.log("Spot: "+converted);
+            temp.push(converted);
         }
     }
     return temp;
 };
 export default class Cell {
-    constructor(state, x, y, pixelScalar, cWidth){
+    constructor(state, x, y, pixelScalar, gWidth){
         this.state = state;
         this.scalar = pixelScalar;
         this.gridPosition = [x, y];
-        this.canvasPositions = pixelPositions(...this.gridPosition, this.scalar, cWidth);
+        this.canvasPositions = pixelPositions(...this.gridPosition, this.scalar, gWidth);
         this.color = [genColor(), genColor(), genColor(), 255];
     }
     set alive(value){ this.state = value; }
