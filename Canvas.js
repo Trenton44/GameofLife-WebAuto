@@ -1,16 +1,27 @@
 import Grid from "./Grid.js";
 const GCD = (a, b) => b == 0 ? a : GCD(b, a%b);
+const Round = (num, place) => Math.floor(num/place)*place;
+const GridCoords = (x, y, width, height, size) => {
+    let coords = {};
+    coords.x = x;
+    coords.y = y;
+    coords.dx = width;
+    coords.dy = height;
+    coords.size = size;
+    return coords;
+};
 export default class Canvas {
-    constructor(ctx, borderSize=1, grids=1){
+    constructor(ctx){
         // round the canvas to the nearest hundredth
-        ctx.canvas.width = Math.floor(ctx.canvas.width/100)*100;
-        ctx.canvas.height = Math.floor(ctx.canvas.height/100)*100;
+        this.ctx = ctx;
+        ctx.canvas.width = Round(ctx.canvas.width, 100);
+        ctx.canvas.height = Round(ctx.canvas.height, 100);
         let gcd = GCD(ctx.canvas.width, ctx.canvas.height);
         this.ratio = [ctx.canvas.width/gcd, ctx.canvas.height/gcd];
-        console.log(this.ratio);
         this.borderCoords = [[0, 0, ctx.canvas.width, ctx.canvas.height]];
         console.log("setting up Grids.");
-        //this.grids = this.#splitCanvas(ctx, borderSize, grids);
+        this.grids = [new Grid(ctx, GridCoords(0, 0, ctx.canvas.width, ctx.canvas.height))];
+        this.grids[0].init();
         console.log("Grid setup complete.");
         console.log("Drawing borders.");
         this.borderCoords.forEach(coord => {
@@ -19,44 +30,36 @@ export default class Canvas {
             ctx.fillRect(...coord);
         });
         console.log("Borders drawn. drawing Grid spaces...");
-        //this.grids.forEach(grid => grid.wipeField());
+        this.grids.forEach(grid => grid.wipeField());
         console.log("Grid spaces drawn.");
         console.log(ctx);
     }
-    #splitCanvas(ctx, borderSize, grids){
-        const gridWidth = (ctx.canvas.width/grids) - borderSize;
-        const gridHeight = ctx.canvas.height - 2*borderSize;
-        const initialX = (inc) => borderSize+(inc*gridWidth)+(inc*borderSize);
-        //calculate aspect ratio of canvas. 4:3, 16:9, etc.
-        // this becomes the values of the for loops
-        // (Every 4 grids, make a new row)
-        for(let i=0; i < grids; i++){
-            console.log("Setting up Grid "+i);
-            let coords = {};
-
+    getGridFromXY(x, y){}
+    SubdivideGrid(index){
+        let grids = [];
+        let current = this.grids[index];
+        for(let ystep=0; ystep < 2; ystep++){
+            for(let xstep=0; xstep < 2; xstep++){
+                let coords = {};
+                coords.x = xstep * (current.ctxSpace.dx/xstep);
+                console.log([xstep, current.ctxSpace.dx, xstep]);
+                coords.dx = current.ctxSpace.dx/xstep;
+                coords.y = ystep * (current.ctxSpace.y/ystep);
+                coords.dy = current.ctxSpace.dy/ystep;
+                coords.size = xstep * ystep;
+                console.log(coords);
+                let grid = new Grid(this.ctx, coords);
+                let gridx = xstep * (current.width/xstep);
+                let gridy = ystep * (current.height/ystep);
+                let griddx = current.width/xstep;
+                let griddy = current.height/ystep;
+                let gslice = current.grid.slice(gridy, gridy+griddy);
+                gslice.forEach(yarr => yarr.slice(gridx, gridx+griddx));
+                grid.grid = gslice;
+                // copy slice of 2d grid from current to the new grid obtained
+                grids.push(grid);
+            }
         }
-        return {};
+        this.grids.splice(index, 1, ...grids);
     }
 }
-
-/**
- * #splitCanvas(ctx, seed){
-        let temp = [];
-        const gridWidth = (ctx.canvas.width/this.gridCount) - this.borderSize;
-        const gridHeight = ctx.canvas.height - 2*this.borderSize;
-        const initialX = (inc) => this.borderSize+(inc*gridWidth)+(inc*this.borderSize);
-        for(let i = 0; i < this.gridCount; i++){
-            console.log("Setting up Grid "+i);
-            let coords = {};
-            coords.x = initialX(i);
-            coords.y = this.borderSize;
-            coords.dx = coords.x + gridWidth - coords.x - this.borderSize;
-            coords.dy = coords.y + gridHeight - this.borderSize;
-            coords.size = this.cellSize;
-            temp.push(new Grid(ctx, coords, coords.dx, coords.dy, seed));
-            console.log(temp[i]);
-            console.log("Grid "+i+" setup complete.");
-        }
-        return temp;
-    }
- */
