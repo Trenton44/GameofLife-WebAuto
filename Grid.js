@@ -2,17 +2,17 @@ import Cell from "./Cell.js";
 import Rules from "./Rules.js";
 
 export default class Grid {
-    constructor(ctx, ctxSpace, width, height, seed){
+    constructor(ctx, ctxSpace){
         this.ctx = ctx;
         this.ctxSpace = ctxSpace;
-        this.width = width/(this.ctxSpace.size);
-        this.height = height/(this.ctxSpace.size);
-        this.grid = this.#newGame(seed);
+        this.width = this.ctxSpace.dx/(this.ctxSpace.size);
+        this.height = this.ctxSpace.dy/(this.ctxSpace.size);
+        
     }
-    #newGame(seed){
+    init(){ this.grid = this.#newGame(); }
+    #newGame(){
         let grid = [];
-        if(seed.length < 2)
-            throw Error("Seed should be at least two integers long.");
+        let seed = "22";
         for(let y=0; y < this.height; y++){
             grid[y] = [];
             for(let x=0; x < this.width; x++){
@@ -84,8 +84,8 @@ export default class Grid {
         }
         this.ctx.putImageData(nextImage, this.ctxSpace.x, this.ctxSpace.y);
     }
-    wipeField(){
-        this.ctx.fillStyle = "white";
+    wipeField(color){
+        this.ctx.fillStyle = color ? color : "blue";
         console.log([this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy]);
         this.ctx.fillRect(this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy);
     }
