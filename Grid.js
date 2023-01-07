@@ -5,9 +5,9 @@ export default class Grid {
     constructor(ctx, ctxSpace){
         this.ctx = ctx;
         this.ctxSpace = ctxSpace;
-        this.width = this.ctxSpace.dx/(this.ctxSpace.size);
-        this.height = this.ctxSpace.dy/(this.ctxSpace.size);
-        
+        this.width = this.ctxSpace.dx/(this.ctxSpace.size[0]);
+        this.height = this.ctxSpace.dy/(this.ctxSpace.size[1]);
+        this.effects = {};
     }
     init(){ this.grid = this.#newGame(); }
     #newGame(){
@@ -78,6 +78,7 @@ export default class Grid {
             nextImage.data[counter+1] = next.value[1];
             nextImage.data[counter+2] = next.value[2];
             nextImage.data[counter+3] = next.value[3];
+            this.effects.forEach(effect => effect(nextImage.data, [counter, counter+1, counter+2, counter+3]));
             //console.log("After: "+[nextImage.data[counter], nextImage.data[counter+1], nextImage.data[counter+2],nextImage.data[counter+3] ]);
             counter += 4;
             next = pixels.next();
