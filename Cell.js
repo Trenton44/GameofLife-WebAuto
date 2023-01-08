@@ -9,10 +9,10 @@ export default class Cell {
     }
     #getCanvasPositions(scalar){
         let temp = [];
-        let cx = this.gridPosition[0]*scalar;
-        let cy = this.gridPosition[1]*scalar;
-        for(let i=cx; i<cx+scalar; i++){
-            for(let z=cy; z<cy+scalar; z++){
+        let cx = this.gridPosition[0]*scalar[0];
+        let cy = this.gridPosition[1]*scalar[1];
+        for(let i=cx; i<cx+scalar[0]; i++){
+            for(let z=cy; z<cy+scalar[1]; z++){
                 temp.push([i,z]);
             }
         }
