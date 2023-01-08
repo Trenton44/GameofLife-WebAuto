@@ -1,12 +1,21 @@
 import Cell from "./Cell.js";
 import Rules from "./Rules.js";
+const GCD = (a, b) => b == 0 ? a : GCD(b, a%b);
+const Ratio = (width, height) => {
+    let gcd = GCD(width, height);
+    let ratio = [width/gcd, height/gcd];
+    //ratio.forEach(pos => pos = Math.sqrt(pos) % 1 == 0 ? Math.sqrt(pos) : pos);
+    return ratio;
+};
 
 export default class Grid {
     constructor(ctx, ctxSpace){
         this.ctx = ctx;
         this.ctxSpace = ctxSpace;
-        this.width = this.ctxSpace.dx/(this.ctxSpace.size[0]);
-        this.height = this.ctxSpace.dy/(this.ctxSpace.size[1]);
+        this.cellSize = Ratio(this.ctxSpace.dx, this.ctxSpace.dy);
+        this.pos = [this.ctxSpace.x/(this.cellSize[0]), this.ctxSpace.y/(this.cellSize[1])];
+        this.width = this.ctxSpace.dx/(this.cellSize[0]);
+        this.height = this.ctxSpace.dy/(this.cellSize[1]);
         this.effects = {};
     }
     init(){ this.grid = this.#newGame(); }
@@ -17,7 +26,7 @@ export default class Grid {
             grid[y] = [];
             for(let x=0; x < this.width; x++){
                 let alive = x % seed[0] == 0 && y % seed[1] == 0;
-                grid[y][x] = new Cell(alive, x, y, this.ctxSpace.size);
+                grid[y][x] = new Cell(alive, x, y, this.cellSize);
             }
         }
         return grid;
@@ -50,10 +59,10 @@ export default class Grid {
     *#cellPixel(arr){
         for(let y=0; y < arr.length; y++){
             let xaxis = arr[y];
-            for(let step=0; step < this.ctxSpace.size; step++){
+            for(let step=0; step < this.cellSize[0]; step++){
                 for(let x=0; x < xaxis.length; x++){
                     let cell = xaxis[x];
-                    for(let z=step; z < cell.canvasPositions.length; z+=this.ctxSpace.size){
+                    for(let z=step; z < cell.canvasPositions.length; z+=this.cellSize[0]){
                         yield cell.draw();
                     }
                 }
@@ -73,12 +82,14 @@ export default class Grid {
         let next = pixels.next();
         let counter = 0;
         while(!next.done){
-            //console.log("Before: "+[nextImage.data[counter], nextImage.data[counter+1], nextImage.data[counter+2],nextImage.data[counter+3] ]);
             nextImage.data[counter] = next.value[0];
             nextImage.data[counter+1] = next.value[1];
             nextImage.data[counter+2] = next.value[2];
             nextImage.data[counter+3] = next.value[3];
-            this.effects.forEach(effect => effect(nextImage.data, [counter, counter+1, counter+2, counter+3]));
+            //console.log("Before: "+[nextImage.data[counter], nextImage.data[counter+1], nextImage.data[counter+2],nextImage.data[counter+3] ]);
+            Object.entries(this.effects).forEach(([effect, func]) => {
+                func(nextImage.data, [counter, counter+1, counter+2, counter+3]);
+            });
             //console.log("After: "+[nextImage.data[counter], nextImage.data[counter+1], nextImage.data[counter+2],nextImage.data[counter+3] ]);
             counter += 4;
             next = pixels.next();
@@ -87,7 +98,7 @@ export default class Grid {
     }
     wipeField(color){
         this.ctx.fillStyle = color ? color : "blue";
-        console.log([this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy]);
+        //console.log([this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy]);
         this.ctx.fillRect(this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy);
     }
 }
