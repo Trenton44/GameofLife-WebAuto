@@ -1,16 +1,6 @@
 import Grid from "./Grid.js";
-const GCD = (a, b) => b == 0 ? a : GCD(b, a%b);
-const Round = (num, place) => Math.floor(num/place)*place;
 
-const GridCoords = (x, y, width, height, size) => {
-    let coords = {};
-    coords.x = x;
-    coords.y = y;
-    coords.dx = width;
-    coords.dy = height;
-    coords.size = size;
-    return coords;
-};
+const Round = (num, place) => Math.floor(num/place)*place;
 export default class Canvas {
     constructor(canvas){
         // round the canvas to the nearest hundredth
@@ -20,11 +10,14 @@ export default class Canvas {
         this.setupHandlers();
         this.ctx.canvas.width = Round(this.ctx.canvas.width, 100);
         this.ctx.canvas.height = Round(this.ctx.canvas.height, 100);
-        let gcd = GCD(this.ctx.canvas.width, this.ctx.canvas.height);
-        this.ratio = [this.ctx.canvas.width/gcd, this.ctx.canvas.height/gcd];
         console.log("setting up Grids.");
         // grid needs the cell size to be auto-calculated.
-        this.grids = [new Grid(this.ctx, GridCoords(0, 0, this.ctx.canvas.width, this.ctx.canvas.height, this.ratio))];
+        this.grids = [new Grid(this.ctx, {
+            x: 0,
+            y: 0,
+            dx: this.ctx.canvas.width,
+            dy: this.ctx.canvas.height
+        })];
         this.grids[0].init();
         console.log("Grid setup complete.");
         console.log("Drawing borders.");
@@ -54,41 +47,41 @@ export default class Canvas {
             if(gridI == null)
                 return null;
             this.grids[gridI].effects.hover = OrangeHue;
-            console.log(gridI);
             // add orange effect here.
         };
+        this.canvas.onmouseout = (event) => {
+            this.grids.forEach(grid => delete grid.effects.hover);
+        };
     }
-    getGridFromXY(x, y){}
     SubdivideGrid(index){
         let grids = [];
         let current = this.grids[index];
-        console.log(current);
         const width = current.ctxSpace.dx/2;
         const height = current.ctxSpace.dy/2;
         for(let y=0; y < 2; y++){
             for(let x=0; x < 2; x++){
-                let coords = {};
-                coords.x = x*width;
-                coords.dx = coords.x + width;
-                coords.y = y * height;
-                coords.dy = coords.y + height;
-                coords.size = current.ctxSpace.size/4;
-                let grid = new Grid(this.ctx, coords);
-                grid.grid = current.grid.slice(grid.ctxSpace.y, grid.y+grid.ctxSpace.dy);
-                grid.grid.forEach(xarr => xarr = xarr.slice(grid.ctxSpace.x, grid.ctxSpace.dx));
+                let grid = new Grid(this.ctx, {
+                    x: x*width,
+                    y: y*height,
+                    dx: width,
+                    dy: height
+                });
+                grid.grid = current.grid.slice(grid.pos[1], grid.pos[1]+grid.height);
+                for(let i in grid.grid)
+                { grid.grid[i] = grid.grid[i].slice(grid.pos[0], grid.pos[0]+grid.width); }
                 grids.push(grid);
             }
         }
         this.grids.splice(index, 1, ...grids);
     }
     findGrid(x, y){
-        for(let i in this.grids){
-            let grid = this.grids[i];
-            let isX = x > grid.ctxSpace.x && x < grid.ctxSpace.dx;
-            let isY = y > grid.ctxSpace.y && y < grid.ctxSpace.dy;
+        for(let index in this.grids){
+            let coords = this.grids[index].ctxSpace;
+            let isX = x > coords.x && x < coords.x + coords.dx;
+            let isY = y > coords.y && y < coords.y + coords.dy;
             if(!(isX && isY))
                 continue;
-            return i;
+            return index;
         }
         return null;
     }
