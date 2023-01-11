@@ -3,22 +3,40 @@ import Rules from "./Rules.js";
 const GCD = (a, b) => b == 0 ? a : GCD(b, a%b);
 const Ratio = (width, height) => {
     let gcd = GCD(width, height);
-    let ratio = [width/gcd, height/gcd];
     //ratio.forEach(pos => pos = Math.sqrt(pos) % 1 == 0 ? Math.sqrt(pos) : pos);
-    return ratio;
+    return [width/gcd, height/gcd];
 };
 
+/**
+ * Class Representing Grid Instances
+ * Maintain GoL state and convert cell grid to pixels for Canvas to render
+ */
 export default class Grid {
+    /**
+     * 
+     * @param {HTMLCanvasContext} ctx - the 2d context of the parent HTMLCanvas
+     * @param {Object} ctxSpace - Canvas Coordinates passed from parent Canvas instance
+     */
     constructor(ctx, ctxSpace){
         this.ctx = ctx;
         this.ctxSpace = ctxSpace;
+        // find GCD of Grid width/height, divide to get the ratio of x-pixels -> y-pixels for each cell
         this.cellSize = Ratio(this.ctxSpace.dx, this.ctxSpace.dy);
+        // Get position of Grid within the Canvas space
         this.pos = [this.ctxSpace.x/(this.cellSize[0]), this.ctxSpace.y/(this.cellSize[1])];
+        this.name = "Grid "+this.pos[0]+" : "+this.pos[1];
         this.width = this.ctxSpace.dx/(this.cellSize[0]);
         this.height = this.ctxSpace.dy/(this.cellSize[1]);
         this.effects = {};
     }
+    /**
+     * Initialize the game by filling Cells with values
+     */
     init(){ this.grid = this.#newGame(); }
+    /**
+     * fills grid with 2d array [height][width] with Cell instances
+     * @returns {Object[Grid.height][Grid.width]} - GoL grid containing Cells
+     */
     #newGame(){
         let grid = [];
         let seed = "22";
@@ -31,6 +49,10 @@ export default class Grid {
         }
         return grid;
     }
+    /**
+     * Changes status of Cells, given the ruleset of the GoL
+     * @returns {Grid.grid}
+     */
     newGeneration(){
         let temp = [];
         this.grid.forEach((yarr, y) => {
@@ -42,8 +64,14 @@ export default class Grid {
         });
         return this.grid;
     }
+    /**
+     * Takes a generation's cell values and the x,y coords of the desired cell, returns the values of that cell's neighbors
+     * @param {integer} x 
+     * @param {integer} y 
+     * @param {boolean[]} boolGrid 
+     * @returns 
+     */
     getNeighbors(x, y, boolGrid){
-        //console.log("Cell: "+[x, y]+" : "+boolGrid[y][x].alive);
         let temp = [];
         for(let z=y-1; z <= y+1; z++){
             if(z < 0 || z >= this.height){ continue; }
@@ -53,9 +81,15 @@ export default class Grid {
                 temp.push(boolGrid[z][i]);
             }
         }
-        //console.log("Neighbors: "+temp);
         return temp;
     }
+    /**
+     * Generator function for rendering each Cell to the Canvas ImageData array.
+     * 
+     * @param {Cell[]} arr 
+     * @yields {Cell}
+     * @returns 
+     */
     *#cellPixel(arr){
         for(let y=0; y < arr.length; y++){
             let xaxis = arr[y];
@@ -70,11 +104,18 @@ export default class Grid {
         }
         return true;
     }
+    /**
+     * Ages the GoL grid to next generation, calls Grid.draw()
+     */
     age(){
         let temp = this.newGeneration();
         this.draw(temp);
         this.grid = temp;
     }
+    /**
+     * Pulls pixel values of each cell and writes them to ImageData[] for this Grid instance's Canvas area.
+     * @param {Grid.grid} frame - the grid to be drawn to canvas. passed automatically via Grid.age()
+     */
     draw(frame){
         let imageData = this.ctx.getImageData(this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy);
         let nextImage = this.ctx.createImageData(imageData);
@@ -96,9 +137,25 @@ export default class Grid {
         }
         this.ctx.putImageData(nextImage, this.ctxSpace.x, this.ctxSpace.y);
     }
-    wipeField(color){
-        this.ctx.fillStyle = color ? color : "blue";
-        //console.log([this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy]);
+    /**
+     * Returns count of all living/dead cells in game
+     * @param {boolean} type - true=living/false=dead
+     * @returns {integer}
+     */
+    getCells(type){
+        let counter = 0;
+        this.grid.forEach(cell => {
+            if(cell.alive == type)
+                counter += 1;
+        });
+        return counter;
+    }
+    /**
+     * Wipes the Grid's canvas coordinates with a color
+     * @param {String} color - defaults to blue
+     */
+    wipeField(color="blue"){
+        this.ctx.fillStyle = color;
         this.ctx.fillRect(this.ctxSpace.x, this.ctxSpace.y, this.ctxSpace.dx, this.ctxSpace.dy);
     }
 }
