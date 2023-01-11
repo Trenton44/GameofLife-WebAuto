@@ -14,18 +14,20 @@ async function start(seed){
     root.appendChild(canvas);
     canvas.width = 800;
     canvas.height = 800;
-    const canvasLogic = new Canvas(canvas, 12, 1, 1, seed);
+    let overlay = document.getElementById("canvas-context-menu");
+    const canvasLogic = new Canvas(canvas, overlay);
     console.log(canvasLogic.grids);
     canvasLogic.grids.forEach(grid => grid.init());
-    canvasLogic.SubdivideGrid(0);
-    let colors = ["red", "green", "blue", "yellow"];
-    canvasLogic.grids.forEach((grid, index) => grid.wipeField(colors[index]));
-    /*canvasLogic.grids.forEach(grid => grid.draw(grid.grid));
+    console.log(canvasLogic.grids);
+    //canvasLogic.SubdivideGrid(0);
+    //let colors = ["red", "green", "blue", "yellow"];
+    //canvasLogic.grids.forEach((grid, index) => grid.wipeField(colors[index]));
+    canvasLogic.grids.forEach(grid => grid.draw(grid.grid));
     await sleep(500);
     while(true){
         canvasLogic.grids.forEach(grid => grid.age());
         await sleep(sleepTime);
-    }*/
+    }
 }
 console.log("loading canvas.");
 start("22");

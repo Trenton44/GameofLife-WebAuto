@@ -1,8 +1,9 @@
-.canvas-context-menu {
+#canvas-context-menu {
     position: absolute;
     width: 20vw;
     height: 98vh;
     right: 0;
+    top: 0;
     background-color: gray;
     visibility: hidden;
 }
