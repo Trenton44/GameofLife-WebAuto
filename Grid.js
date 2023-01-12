@@ -137,6 +137,17 @@ export default class Grid {
         }
         this.ctx.putImageData(nextImage, this.ctxSpace.x, this.ctxSpace.y);
     }
+    displayData(div){
+        console.log(div);
+        while(div.firstChild){ div.removeChild(div.lastChild); }
+        let title = document.createElement("p");
+        title.innerHTML = "Name: "+this.name;
+        title.className = "canvas-context-name";
+        div.appendChild(title);
+        
+
+        console.log(title);
+    }
     /**
      * Returns count of all living/dead cells in game
      * @param {boolean} type - true=living/false=dead
